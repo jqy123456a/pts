@@ -1,48 +1,31 @@
-# 运行时二进制
+# 用户运行时数据（本地存档）
+Home/
+
+# 依赖
+node_modules/
+
+# 可执行文件与运行时二进制
 *.exe
 *.dll
 *.pak
 *.bin
 *.dat
-*.pdb
 *.snapshot
-*.jar
+*.pdb
 
-# 用户数据与缓存
-Home/
-node_modules/
-
-# 引擎自带大体积资产/内容（非本组产出，GPL-3.0 上游）
+# 引擎大体积资产（音频/图片/字体/第三方扩展，非本组产出）
 resources/app/audio/
 resources/app/image/
 resources/app/font/
 resources/app/extension/
-resources/app/character/
-resources/app/card/
-resources/app/layout/
-resources/app/theme/
-resources/app/src/character/
-resources/app/src/card/
-resources/app/src/noname/
-resources/app/game/@codemirror/
-resources/app/game/typescript.js
-resources/app/game/eslint-linter-browserify.js
-resources/app/game/compiler-sfc.esm-browser.js
-resources/app/game/codemirror.js
-resources/app/game/codemirror6.js
-resources/app/game/jszip.js
-resources/app/game/core-js-bundle.js
 
 # 备份与本地化
 backup/
 locales/
 
-# 参考模板
-文档/GBT-8567-2006计算机软件文档编制规范word版/
+# Office 临时锁文件
+~$*
 
 # 系统文件
 Thumbs.db
 .DS_Store
-
-# Office 临时锁文件
-~$*
