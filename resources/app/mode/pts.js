@@ -75,6 +75,17 @@ function clearPtsUI() {
 }
 
 /* 战斗界面整理:行动说明文字(arenalog)藏到右侧半透明,顶部按钮组拉开间距 */
+function zoomBy(delta) {
+	let zoom = parseInt(lib.config.ui_zoom, 10);
+	if (isNaN(zoom)) {
+		zoom = 100;
+	}
+	zoom = Math.max(50, Math.min(300, zoom + delta));
+	game.saveConfig("ui_zoom", zoom + "%");
+	game.documentZoom = (game.deviceZoom || 1) * zoom / 100;
+	ui.updatez();
+}
+
 function ptsTidyBattleUI() {
 	const al = document.getElementById("arenalog");
 	if (al) {
@@ -102,8 +113,17 @@ function ptsTidyBattleUI() {
 			b.style.marginBottom = "8px";
 		});
 	}
-	console.log("[pts] battle ui tidied");
+	if (!game.ptsZoomButtons) {
+		game.ptsZoomButtons = true;
+		ui.create.system("放大", function () {
+			zoomBy(10);
+		});
+		ui.create.system("缩小", function () {
+			zoomBy(-10);
+		});
+	}
 }
+game.ptsZoomBy = zoomBy;
 game.ptsTidyBattleUI = ptsTidyBattleUI;
 
 /* ---- 存档 ---- */
@@ -187,23 +207,42 @@ function matchHero(query, id) {
 	return false;
 }
 
+const GROUP_COLOR = {
+	wei: "#5b8def",
+	shu: "#e2604a",
+	wu: "#57c063",
+	qun: "#a58b5a",
+	jin: "#9b6dd4",
+	shen: "#e8c268",
+	key: "#d4a017",
+	god: "#e8c268",
+};
+
 function buildHeroCard(id) {
 	const hp = hpOf(id);
 	const name = lib.translate[id] || id;
-	const skill = (lib.character[id][3] && lib.character[id][3][0]) || "";
+	const info = lib.character[id];
+	const accent = GROUP_COLOR[(info && info[1]) || ""] || "#7a8794";
+	const skill = (info && info[3] && info[3][0]) || "";
 	const skillName = skill ? lib.translate[skill] : "";
 	const card = document.createElement("div");
 	card.className = "pts-hero";
 	card.dataset.hero = id;
 	card.style.cssText =
-		"width:158px;height:186px;background:#2a2f36;border:2px solid #454b54;border-radius:12px;" +
-		"display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden;";
-	card.innerHTML =
-		'<div style="font-size:64px;line-height:1;color:#c9b98a;font-weight:bold;">' + name.charAt(0) + "</div>" +
-		'<img src="' + lib.assetURL + "image/character/" + id + '.jpg" style="width:86px;height:86px;border-radius:50%;object-fit:cover;border:2px solid #555;" onerror="this.style.visibility=\'hidden\'">' +
-		"<div style='font-size:18px;font-weight:bold;'>" + name + "</div>" +
-		(skillName ? "<div style='font-size:12px;color:#9ecfff;'>" + skillName + "</div>" : "") +
-		"<div style='font-size:13px;color:#e8c268;'>❤ " + hp + "</div>";
+		"width:168px;height:200px;background:#262b33;border:2px solid " + accent + ";border-radius:12px;" +
+		"overflow:hidden;display:flex;flex-direction:column;";
+	const portrait = document.createElement("div");
+	portrait.style.cssText = "width:100%;height:118px;flex-shrink:0;";
+	portrait.setBackground(id, "character");
+	const body = document.createElement("div");
+	body.style.cssText =
+		"flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0 6px;";
+	body.innerHTML =
+		"<div style='font-size:16px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;'>" + name + "</div>" +
+		(skillName ? "<div style='font-size:11px;color:#9ecfff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;'>" + skillName + "</div>" : "") +
+		"<div style='font-size:12px;color:#ff8a8a;'>❤ " + hp + "</div>";
+	card.appendChild(portrait);
+	card.appendChild(body);
 	card.onclick = () => {
 		startRun(id, hp, name);
 	};
@@ -211,118 +250,72 @@ function buildHeroCard(id) {
 }
 
 function showHeroSelect(resume) {
-	if (!document.getElementById("pts-hero-style")) {
+	clearPtsUI();
+	if (!document.getElementById("pts-hero-hp-style")) {
 		const st = document.createElement("style");
-		st.id = "pts-hero-style";
+		st.id = "pts-hero-hp-style";
 		st.innerHTML =
-			".pts-hero{transition:all .18s ease;}" +
-			".pts-hero:hover{border-color:#e8c268 !important;background:#333a44 !important;transform:translateY(-6px);box-shadow:0 8px 22px rgba(0,0,0,.5);cursor:pointer;}";
+			".button.character > .hp > div{width:12px;height:12px;margin-left:2px;background:url('theme/style/hp/image/round1.png');background-size:100% 100%;border:none;box-shadow:none;border-radius:0;filter:none;}" +
+			".button.character > .hp > div.exclude{background:url('theme/style/hp/image/round4.png');background-size:100% 100%;}" +
+			".button.character > .hp > .shield{background:url('theme/style/hp/image/shield.png');background-size:100% 100%;}";
 		document.head.appendChild(st);
 	}
-	clearPtsUI();
-	const root = document.createElement("div");
-	root.className = "pts-root";
-	root.style.cssText =
-		"position:absolute;left:0;top:0;right:0;bottom:0;background:linear-gradient(160deg,#20242a,#14161a 60%,#1a1420);z-index:9990;" +
-		"font-family:'Microsoft YaHei',xinwei,sans-serif;color:#e8e4d8;display:flex;flex-direction:column;align-items:center;";
-	root.innerHTML =
-		'<div style="font-size:34px;padding:26px 0 4px;color:#e8c268;text-shadow:0 0 12px rgba(232,194,104,.35);letter-spacing:6px;">选 择 爬 塔 武 将</div>' +
-		'<div style="font-size:14px;color:#9a958a;padding-bottom:14px;">初始体力 = 武将体力上限 · 战斗损血延续 · 死亡即爬塔失败</div>';
-
-	const searchBox = document.createElement("div");
-	searchBox.style.cssText = "width:620px;display:flex;align-items:center;gap:8px;padding-bottom:8px;";
-	const input = document.createElement("input");
-	input.placeholder = "检索武将名 / 拼音（如 曹操、caocao、cc）";
-	input.style.cssText =
-		"flex:1;height:34px;border:2px solid #294510;border-radius:6px;background:#1c2026;color:#e8e4d8;" +
-		"text-align:center;font-size:16px;font-weight:bold;outline:none;";
-	searchBox.appendChild(input);
-	root.appendChild(searchBox);
-
-	const hint = document.createElement("div");
-	hint.style.cssText = "font-size:12px;color:#6f6a60;padding-bottom:10px;";
-	hint.innerHTML = "支持武将名与拼音首字母检索（cc → 曹操）；清空则显示推荐武将";
-	root.appendChild(hint);
-
-	const wrap = document.createElement("div");
-	wrap.style.cssText = "position:absolute;left:0;right:0;top:168px;bottom:0;overflow:auto;";
-	root.appendChild(wrap);
-	const grid = document.createElement("div");
-	grid.style.cssText = "display:flex;flex-wrap:wrap;width:920px;margin:0 auto;justify-content:center;gap:18px;";
-	wrap.appendChild(grid);
-
-	function renderResumeCard() {
-		if (!resume || !resume.hero) {
-			return;
-		}
+	if (resume && resume.hero) {
 		const layerTxt = resume.cur ? "第" + (resume.cur.l + 1) + "层" : "塔底";
 		const info = resume.pending
 			? "战斗进行中 · " + (lib.translate[resume.hero] || resume.hero) + " · 体力 " + resume.hp + "/" + resume.hpMax
 			: layerTxt + " · " + (lib.translate[resume.hero] || resume.hero) + " · 体力 " + resume.hp + "/" + resume.hpMax;
-		const rb = document.createElement("div");
-		rb.className = "pts-hero";
-		rb.style.cssText =
-			"width:158px;height:186px;background:linear-gradient(160deg,#3a3421,#2a2517);border:2px solid #e8c268;border-radius:12px;" +
-			"display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;overflow:hidden;";
-		rb.innerHTML =
-			'<div style="font-size:46px;line-height:1;color:#e8c268;">▶</div>' +
-			'<div style="font-size:19px;font-weight:bold;color:#e8c268;">继续冒险</div>' +
-			"<div style='font-size:12px;color:#cfc9b4;text-align:center;line-height:1.6;'>" + info + "</div>" +
-			"<div style='font-size:11px;color:#777;font-style:italic;'>点击其余武将则重开新档</div>";
-		rb.onclick = function () {
-			console.log("[pts] resume requested");
+		ui.create.system("▶ 继续冒险", function () {
 			_status.ptsState = resume;
 			game.ptsFlowSave();
 			game.reload();
-		};
-		grid.appendChild(rb);
+		}, true);
 	}
 
-	function renderGrid(query) {
-		const q = String(query || "").trim();
-		grid.innerHTML = "";
-		if (!q) {
-			renderResumeCard();
-			for (const id of BAL.heroPool) {
-				if (!lib.character[id]) {
-					continue;
+	lib.config.buttoncharacter_style = "old";
+	const filter = function (id) {
+		const info = lib.character[id];
+		if (!info) {
+			return true;
+		}
+		return typeof info[4] !== "number" && !Array.isArray(info[4]);
+	};
+	const dialog = ui.create.characterDialog(filter);
+	dialog.open();
+	dialog.style.transform = "scale(1.3)";
+	dialog.style.transformOrigin = "center center";
+
+	for (const btn of dialog.buttons) {
+		btn.removeEventListener("click", ui.click.button);
+		btn.addEventListener("click", function () {
+			const id = btn.link;
+			dialog.close();
+			startRun(id, hpOf(id), lib.translate[id] || id);
+		});
+	}
+
+	const input = dialog.querySelector("input");
+	if (input) {
+		input.placeholder = "检索武将名 / 拼音（如 曹操、caocao、cc）";
+		input.addEventListener("input", function () {
+			const q = String(input.value || "").trim();
+			for (const btn of dialog.buttons) {
+				if (!q || matchHero(q, btn.link)) {
+					btn.classList.remove("nodisplay");
+				} else {
+					btn.classList.add("nodisplay");
 				}
-				grid.appendChild(buildHeroCard(id));
 			}
-			return;
-		}
-		let count = 0;
-		for (const id of listHeroes()) {
-			if (count >= 80) {
-				break;
-			}
-			if (!matchHero(q, id)) {
-				continue;
-			}
-			grid.appendChild(buildHeroCard(id));
-			count++;
-		}
-		if (!count) {
-			const none = document.createElement("div");
-			none.style.cssText = "width:100%;text-align:center;color:#8a8577;padding-top:40px;font-size:15px;";
-			none.innerHTML = "未找到匹配武将";
-			grid.appendChild(none);
-		}
+		});
+		input.addEventListener("keydown", function (e) {
+			e.stopPropagation();
+		});
+		input.addEventListener("mousedown", function (e) {
+			e.stopPropagation();
+		});
 	}
 
-	input.addEventListener("input", function () {
-		renderGrid(input.value);
-	});
-	input.addEventListener("keydown", function (e) {
-		e.stopPropagation();
-	});
-	input.addEventListener("mousedown", function (e) {
-		e.stopPropagation();
-	});
-
-	renderGrid("");
-	document.body.appendChild(root);
-	console.log("[pts] hero-select rendered, resume=" + !!(resume && resume.hero));
+	console.log("[pts] hero-select (native) rendered, resume=" + !!(resume && resume.hero));
 }
 game.ptsShowHeroSelect = showHeroSelect;
 
@@ -417,10 +410,7 @@ game.ptsPrepareArena = function (pk) {
 	game.delay(0.8);
 	setTimeout(function () {
 		ptsTidyBattleUI();
-	}, 600);
-	setTimeout(function () {
-		ptsTidyBattleUI();
-	}, 1800);
+	}, 800);
 };
 
 game.ptsAssignPlayers = function () {

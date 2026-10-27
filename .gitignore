@@ -1,27 +1,8 @@
-# 用户运行时数据（本地存档）
+# 用户运行时数据（本地存档/缓存）
 Home/
 
 # 依赖
 node_modules/
-
-# 可执行文件与运行时二进制
-*.exe
-*.dll
-*.pak
-*.bin
-*.dat
-*.snapshot
-*.pdb
-
-# 引擎大体积资产（音频/图片/字体/第三方扩展，非本组产出）
-resources/app/audio/
-resources/app/image/
-resources/app/font/
-resources/app/extension/
-
-# 备份与本地化
-backup/
-locales/
 
 # Office 临时锁文件
 ~$*
