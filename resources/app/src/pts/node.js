@@ -7,6 +7,7 @@ import { BAL } from "./balance.js";
 import { recipeCandidates, skillCandidates } from "./reward.js";
 import { transform4to1 } from "./deck.js";
 import { genShopInv } from "./shop.js";
+import { openScreen, screenButton } from "./screen.js";
 
 const rndInt = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 
@@ -25,11 +26,15 @@ export function enterNode(state, l, c, node, edges) {
 	state.cur = { l: l, c: c };
 	state.path.push({ l: l, c: c });
 	const type = node.type;
+	let screenTitle = null;
+	let screenMsg = null;
 	if (type === "rest") {
 		state.hp = Math.min(state.hpMax, state.hp + BAL.rest.heal);
-		toast("🔥 篝火:回复 " + BAL.rest.heal + " 点体力");
+		screenTitle = "🔥 篝火";
+		screenMsg = "回复 " + BAL.rest.heal + " 点体力,当前 " + state.hp + "/" + state.hpMax;
 	} else if (type === "chest") {
-		chestResolve(state);
+		screenTitle = "🎁 宝箱";
+		screenMsg = chestResolve(state);
 	} else if (type === "shop") {
 		if (!state.shopInv) {
 			state.shopInv = genShopInv(Math.random, state, BAL);
@@ -40,7 +45,8 @@ export function enterNode(state, l, c, node, edges) {
 		game.ptsShowShop();
 		return true;
 	} else if (type === "event") {
-		toast("❓ 第" + (l + 1) + "层 事件(M3 实装)");
+		screenTitle = "❓ 事件";
+		screenMsg = "第 " + (l + 1) + " 层 事件(M3 实装)";
 	} else {
 		state.pending = { l: l, c: c, type: type, enemies: game.ptsPickEnemies(type, l, state.hero) };
 		persist();
@@ -58,6 +64,14 @@ export function enterNode(state, l, c, node, edges) {
 	updateHud(state);
 	renderMap(state, edges);
 	localStorage.setItem("pts_run", JSON.stringify(state));
+	if (screenTitle) {
+		const s = openScreen(screenTitle);
+		const div = document.createElement("div");
+		div.textContent = screenMsg;
+		div.style.cssText = "font-size:17px;text-align:center;padding:20px 0;";
+		s.body.appendChild(div);
+		s.footer.appendChild(screenButton("继续", () => s.close()));
+	}
 	return true;
 }
 
@@ -108,5 +122,5 @@ function chestResolve(state) {
 			msg += comp();
 		}
 	}
-	toast(msg);
+	return msg;
 }
