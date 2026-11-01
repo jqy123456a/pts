@@ -7,9 +7,10 @@ import { genMap } from "../src/pts/map/gen.js";
 import { renderMap, toast } from "../src/pts/map/ui.js";
 import { pileTuples, heroSkillsOf, migrateState, clearPtsUI } from "../src/pts/battle.js";
 import { deckFromTuples } from "../src/pts/deck.js";
+import { showRewardPanel } from "../src/pts/reward_ui.js";
 
-/* 奖励/商店浮层入口(对局重载回地图后由 ptsRenderResume 触发;Task 5/7 替换为真实现) */
-game.ptsShowReward = function () {};
+/* 商店浮层入口(进入商店节点时由 node.js 触发;Task 7 替换为真实现) */
+game.ptsShowReward = showRewardPanel;
 game.ptsShowShop = function () {};
 
 export const type = "mode";
