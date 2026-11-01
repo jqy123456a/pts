@@ -5,6 +5,12 @@ import { lib, game, ui, get, ai, _status } from "noname";
 import { BAL } from "../src/pts/balance.js";
 import { genMap } from "../src/pts/map/gen.js";
 import { renderMap, toast } from "../src/pts/map/ui.js";
+import { pileTuples, heroSkillsOf, migrateState, clearPtsUI } from "../src/pts/battle.js";
+import { deckFromTuples } from "../src/pts/deck.js";
+
+/* 奖励/商店浮层入口(对局重载回地图后由 ptsRenderResume 触发;Task 5/7 替换为真实现) */
+game.ptsShowReward = function () {};
+game.ptsShowShop = function () {};
 
 export const type = "mode";
 
@@ -50,10 +56,6 @@ function patchAttitude() {
 	};
 }
 
-function buildDeckCount() {
-	return 160;
-}
-
 function hpOf(characterId) {
 	const info = lib.character[characterId];
 	if (!info) {
@@ -66,65 +68,6 @@ function hpOf(characterId) {
 	const num = typeof hp === "number" ? hp : parseInt(hp, 10);
 	return isNaN(num) ? 4 : num;
 }
-
-function clearPtsUI() {
-	const el = document.querySelector(".pts-root");
-	if (el) {
-		el.remove();
-	}
-}
-
-/* 战斗界面整理:行动说明文字(arenalog)藏到右侧半透明,顶部按钮组拉开间距 */
-function zoomBy(delta) {
-	let zoom = parseInt(lib.config.ui_zoom, 10);
-	if (isNaN(zoom)) {
-		zoom = 100;
-	}
-	zoom = Math.max(50, Math.min(300, zoom + delta));
-	game.saveConfig("ui_zoom", zoom + "%");
-	game.documentZoom = (game.deviceZoom || 1) * zoom / 100;
-	ui.updatez();
-}
-
-function ptsTidyBattleUI() {
-	const al = document.getElementById("arenalog");
-	if (al) {
-		al.style.left = "auto";
-		al.style.right = "10px";
-		al.style.top = "64px";
-		al.style.width = "310px";
-		al.style.opacity = "0.5";
-		al.style.pointerEvents = "none";
-		al.style.textAlign = "left";
-	}
-	const s1 = document.getElementById("system1");
-	if (s1) {
-		s1.style.top = "46px";
-		Array.prototype.forEach.call(s1.children, function (b) {
-			b.style.marginRight = "14px";
-			b.style.marginBottom = "8px";
-		});
-	}
-	const s2 = document.getElementById("system2");
-	if (s2) {
-		s2.style.top = "46px";
-		Array.prototype.forEach.call(s2.children, function (b) {
-			b.style.marginLeft = "14px";
-			b.style.marginBottom = "8px";
-		});
-	}
-	if (!game.ptsZoomButtons) {
-		game.ptsZoomButtons = true;
-		ui.create.system("放大", function () {
-			zoomBy(10);
-		});
-		ui.create.system("缩小", function () {
-			zoomBy(-10);
-		});
-	}
-}
-game.ptsZoomBy = zoomBy;
-game.ptsTidyBattleUI = ptsTidyBattleUI;
 
 /* ---- 存档 ---- */
 function saveRun() {
@@ -333,7 +276,11 @@ function startRun(heroId, hpMax, heroName) {
 		hp: hpMax,
 		hpMax: hpMax,
 		gold: BAL.gold.start,
-		deckCount: buildDeckCount(),
+		deck: deckFromTuples(pileTuples()),
+		skills: [],
+		heroSkills: heroSkillsOf(heroId),
+		rewardPending: null,
+		shopInv: null,
 		path: [],
 		cur: null,
 		pending: null,
@@ -360,137 +307,12 @@ game.ptsRenderResume = function () {
 		saveRun();
 	}
 	renderMap(s, s.edges);
+	if (s.rewardPending) {
+		game.ptsShowReward();
+	}
 };
 
-/* ---- 敌将抽取 ---- */
-function buildEnemyPool(exclude) {
-	const pool = [];
-	for (const id in lib.character) {
-		if (id === exclude) {
-			continue;
-		}
-		const info = lib.character[id];
-		if (!info) {
-			continue;
-		}
-		if (info[0] !== "male" && info[0] !== "female") {
-			continue;
-		}
-		pool.push(id);
-	}
-	return pool;
-}
-game.ptsPickEnemies = function (type, layer, heroId) {
-	const pool = buildEnemyPool(heroId);
-	const act = layer >= 8 ? "act2" : "act1";
-	let n;
-	if (type === "battle") {
-		n = act === "act1" ? (Math.random() < BAL.enemy.act1["1v1"] ? 1 : 2) : Math.random() < BAL.enemy.act2["1v2"] ? 2 : 3;
-	} else if (type === "elite") {
-		n = BAL.enemy.enemyCount.elite;
-	} else {
-		n = BAL.enemy.enemyCount.boss;
-	}
-	n = Math.min(n, pool.length);
-	const list = [];
-	while (list.length < n) {
-		const e = pool[Math.floor(Math.random() * pool.length)];
-		if (!list.includes(e)) {
-			list.push(e);
-		}
-	}
-	console.log("[pts] pick enemies", type, "layer" + (layer + 1), n, list.join(","));
-	return list;
-};
-
-/* ---- 对局搭建 ---- */
-game.ptsPrepareArena = function (pk) {
-	clearPtsUI();
-	game.prepareArena(1 + pk.enemies.length);
-	game.delay(0.8);
-	setTimeout(function () {
-		ptsTidyBattleUI();
-	}, 800);
-};
-
-game.ptsAssignPlayers = function () {
-	const state = _status.ptsState;
-	const pk = state.pending;
-	game.zhu = game.me;
-	game.me.getId();
-	game.me.init(state.hero);
-	game.me.identity = "zhu";
-	game.me.setIdentity("zhu");
-	game.me.maxHp = state.hpMax;
-	game.me.hp = state.hp;
-	game.me.update();
-	game.me.directgain(get.cards(4));
-	for (let i = 1; i < game.players.length; i++) {
-		const p = game.players[i];
-		p.getId();
-		p.init(pk.enemies[i - 1]);
-		p.identity = "fan";
-		p.setIdentity("fan");
-		if (pk.type !== "battle") {
-			p.maxHp++;
-			p.hp = p.maxHp;
-			p.update();
-		}
-		p.directgain(get.cards(4));
-		if (p.ai) {
-			p.ai.shown = 1;
-		}
-	}
-	console.log("[pts] arena assigned, enemies=" + (game.players.length - 1));
-};
-
-/* ---- 战斗胜负(dieAfter 钩子调用) ---- */
-function rndInRange(r) {
-	return r[0] + Math.floor(Math.random() * (r[1] - r[0] + 1));
-}
-game.ptsCheckResult = function () {
-	const state = _status.ptsState;
-	if (!state || !state.pending) {
-		return;
-	}
-	if (!game.me.isAlive()) {
-		state.hp = 0;
-		state.defeated = true;
-		state.lastMsg = "☠ 战败于第" + (state.cur.l + 1) + "层 —— 爬塔失败!";
-		state.pending = null;
-		state.pendingEnemies = null;
-		saveRun();
-		game.over(false);
-		return;
-	}
-	const foes = game.players.filter(function (p) {
-		return p !== game.me && p.isAlive();
-	});
-	if (foes.length) {
-		return;
-	}
-	const pk = state.pending;
-	let g;
-	if (pk.type === "battle") {
-		g = rndInRange(BAL.gold.battle);
-		state.lastMsg = "⚔ 胜利!金币 +" + g + ",剩余体力 " + game.me.hp + "/" + state.hpMax;
-	} else if (pk.type === "elite") {
-		g = rndInRange(BAL.gold.elite);
-		state.lastMsg = "💀 精英胜利!金币 +" + g + ",剩余体力 " + game.me.hp + "/" + state.hpMax;
-	} else {
-		g = rndInRange(BAL.gold.elite);
-		state.finished = true;
-		state.lastMsg = "🏆 击败第15层BOSS —— 通关!总金币 " + (state.gold + g);
-	}
-	state.gold += g;
-	state.hp = Math.max(1, game.me.hp);
-	state.pending = null;
-	state.pendingEnemies = null;
-	localStorage.setItem(DIRECT_KEY, "true");
-	localStorage.setItem(FLOW_KEY, FLOW_BATTLE);
-	saveRun();
-	game.over(true);
-};
+/* 对局搭建(敌人抽取/布场/发牌/胜负)已拆至 src/pts/battle.js,见该文件。 */
 
 /* ---- 模式主体 ---- */
 export default () => {
@@ -501,6 +323,9 @@ export default () => {
 			"step 0";
 			var state = game.ptsLoadRun();
 			_status.ptsState = state;
+			if (state) {
+				migrateState(state);
+			}
 			var flow = null;
 			try {
 				flow = localStorage.getItem(game.ptsFlowKey);

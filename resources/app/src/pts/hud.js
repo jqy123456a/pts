@@ -39,5 +39,5 @@ export function updateHud(state) {
 		hero +
 		card("❤", state.hp + "/" + state.hpMax, hpLow ? "#ff6b6b" : "#ff8a8a", hpLow ? "体力告急!" : "体力") +
 		card("💰", state.gold, "#e8c268", "金币") +
-		card("🂠", state.deckCount, "#7ec4ff", "卡组");
+		card("🂠", state.deck ? state.deck.length : state.deckCount, "#7ec4ff", "卡组");
 }
