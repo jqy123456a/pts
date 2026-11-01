@@ -108,8 +108,21 @@ function ptsTidyBattleUI() {
 		ui.create.system("缩小", function () {
 			zoomBy(-10);
 		});
-		ui.create.system("重新开始", function () {
-			const dialog = ui.create.dialog("重新开始", "确定放弃本局并重新选将吗？");
+		ui.create.system("重开本场", function () {
+			const dialog = ui.create.dialog("重开本场", "确定重新开始本场战斗吗？(恢复到进场前状态)");
+			dialog.add([
+				["确定", function () {
+					dialog.close();
+					game.ptsFlowSave();
+					game.reload();
+				}],
+				["取消", function () {
+					dialog.close();
+				}],
+			], "textbutton");
+		});
+		ui.create.system("重开整局", function () {
+			const dialog = ui.create.dialog("重开整局", "确定放弃本局并重新选将吗？");
 			dialog.add([
 				["确定", function () {
 					dialog.close();
