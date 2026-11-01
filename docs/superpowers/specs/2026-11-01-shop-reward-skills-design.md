@@ -37,8 +37,8 @@ shopInv: null | [商品对象数组],                 // 商店到场货单(进�
 对外接口(函数签名按规范文档 §6):
 
 ```js
-initDeck()                                    // 从 lib.cardPile[standard]+[extra] 抓 160 张定义快照;
-                                              // 供 pts.js 在有引擎环境下调用并落盘
+deckFromTuples(tuples)                        // [[suit,number,name,nature?],…] → 160 张牌串数组;
+                                              // 引擎侧由 battle.js pileTuples() 收集后传入,保持零依赖
 count(deck, name)                             // 同名牌数(改牌候选依据,FR-12)
 transform4to1(deck, recipe, pickName)         // 删 4 张 from 名牌 + 加 1 张 to 牌;
                                               // toEach 配方(sha→火杀/雷杀)由 pickName 二选一(nature)
@@ -46,7 +46,7 @@ addCard(deck, name)                           // 加 1 张(随机花色/点数)
 removeKind(deck, name)                        // 同类牌全删(商店"删牌")
 ```
 
-- 纯函数直接操作 deck 数组并返回变更;不 import noname(`initDeck` 除外——它单独导出供挂载侧调用,tests 只测纯函数)。
+- 全文件无 noname import(开局侧由 battle.js 收集引擎 list 元组传入 deckFromTuples),tests 可 node 直跑。
 - 花色/点数规则:`addCard` 用均匀随机;`transform4to1` 的 to 牌沿用引擎默认模板(实现时取 `lib.card[to]` 的默认花色点数,如无则随机合法组合);to 牌为火杀/雷杀时不新建牌名,产出的仍是 `sha` 牌串,nature(fire/thunder)写入第 4 段。
 
 ## 3. 地图接入 🛒 商店节点
@@ -86,8 +86,9 @@ removeKind(deck, name)                        // 同类牌全删(商店"删牌")
 ## 5. 商店 `src/pts/shop.js`(FR-15 全量)
 
 ```js
-openShell()   // 渲染 .pts-shop 浮层(复用地图浮层样式);读 state.shopInv
-trade(item)   // 扣款 → 效果落地 → 存档 → HUD/toast 刷新
+genShopInv(rng, state, bal) → items[]          // 纯逻辑:3~5 槽货单(shop.js)
+tradeState(state, item, sel, rng?) → {ok,msg}  // 纯逻辑:交易守卫与落地(shop.js)
+showShopPanel()                                // 浮层 UI(shop_ui.js),读/写 state.shopInv
 ```
 
 - 进入节点时生成货单:`slots = rndInt(BAL.shop.slots[0], BAL.shop.slots[1])` = 3~5 个槽,从目录抽样(允许重复品类但槽间去重):改牌方案(随机配方,价格 rndInt(150,250),不满足 4 同名时标灰)/ 普通技能 200 / 精英技能 350 / 加牌 60 / 回血+1HP = 50(可连点叠购,受 hpMax 与金币限制)/ 同类牌全删 120(点选后弹出玩家当前持有的牌种列表全删一种)。
@@ -146,12 +147,16 @@ conflict: [],
 
 | 文件 | 动作 | 预估行数 |
 |---|---|---|
-| `resources/app/src/pts/deck.js` | 新建 | ~120 |
-| `resources/app/src/pts/reward.js` | 新建 | ~260 |
-| `resources/app/src/pts/shop.js` | 新建 | ~180 |
-| `resources/app/src/pts/node.js` | 改(chest/shop 分支) | +30 |
-| `resources/app/src/pts/map/gen.js` | 改(shop 加权) | +5 |
-| `resources/app/src/pts/map/ui.js` | 改(图标/提示) | +5 |
-| `resources/app/src/pts/balance.js` | 改(nodeProb/conflict) | +4 |
-| `resources/app/mode/pts.js` | 改(startRun/installPile/assignPlayers/checkResult/迁移) | +80 |
-| `tests/test_deck.mjs` | 新建 | ~120 |
+| `resources/app/src/pts/deck.js` | 新建 | ~140 |
+| `resources/app/src/pts/reward.js` | 新建(纯) | ~110 |
+| `resources/app/src/pts/reward_ui.js` | 新建(浮层) | ~180 |
+| `resources/app/src/pts/shop.js` | 新建(纯) | ~120 |
+| `resources/app/src/pts/shop_ui.js` | 新建(浮层) | ~170 |
+| `resources/app/src/pts/battle.js` | 新建(从 pts.js 拆对局搭建) | ~250 |
+| `resources/app/src/pts/node.js` | 改(chest/shop 分发) | 改 ~40 |
+| `resources/app/src/pts/map/ui.js` | 改(图标/提示) | 改 ~10 |
+| `resources/app/src/pts/balance.js` | 改(nodeProb/conflict/recipes) | 改 ~15 |
+| `resources/app/mode/pts.js` | 改(startRun/迁移/挂载,对局搭建移战 battle.js) | 559→~400 |
+| `tests/test_deck.mjs` | 新建 | ~60 |
+| `tests/test_reward.mjs` | 新建 | ~60 |
+| `tests/test_shop.mjs` | 新建 | ~70 |

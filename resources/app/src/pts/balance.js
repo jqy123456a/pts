@@ -15,10 +15,11 @@ export const BAL = {
 		15: "boss",
 	},
 	nodeProb: {
-		battle: 0.50,
-		event: 0.22,
-		elite: 0.16,
-		rest: 0.12,
+		battle: 0.44,
+		event: 0.20,
+		elite: 0.14,
+		rest: 0.10,
+		shop: 0.12,
 	},
 	eliteMinLayer: 4,
 	enemy: {
@@ -43,12 +44,12 @@ export const BAL = {
 		bulkRemove: 120,
 	},
 	recipes: [
-		{ from: "sha", toEach: ["huosha", "leisha"], tier: "common" },
+		{ from: "sha", toEach: ["fire", "thunder"], tier: "common" },
 		{ from: "shan", to: "tao", tier: "common" },
 		{ from: "tiesuo", to: "huogong", tier: "common" },
-		{ from: "wuxie", to: "lebusi", tier: "common" },
+		{ from: "wuxie", to: "lebu", tier: "common" },
 		{ from: "tao", to: "wuzhong", tier: "elite" },
-		{ from: "huosha", to: "leisha", tier: "elite" },
+		{ from: "shan", to: "wuxie", tier: "elite" },
 	],
 	groupsPerReward: 3,
 	chest: { recipeProb: 0.6, gold: [0, 50] },
@@ -57,5 +58,6 @@ export const BAL = {
 		elite: ["ganglie", "yiji", "fankui", "zhiheng"],
 		boss: ["jianxiong", "paoxiao"],
 	},
+	conflict: [],
 	heroPool: ["caocao", "liubei", "sunquan", "zhangfei", "guanyu", "zhaoyun", "zhouyu", "simayi", "zhugeliang", "diaochan"],
 };
