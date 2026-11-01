@@ -8,13 +8,20 @@
 
 ## 目录结构
 
-- `resources/app/mode/pts.js` — 唯一模式入口（选将·拼音检索 / 开局 / 战斗 / 存档 / 结算）
+- `resources/app/mode/pts.js` — 唯一模式入口（选将·拼音检索 / 开局 / 存档 / 结算）
 - `resources/app/src/pts/` — 自研爬塔层
   - `balance.js` 全部可调数值
   - `map/gen.js` 地图生成（随机游走 + 连通校验）
   - `map/ui.js` 地图渲染（SVG/DOM）
-  - `node.js` 节点调度
+  - `node.js` 节点调度（战斗/精英/BOSS/篝火/宝箱/商店）
   - `hud.js` 顶栏 HUD
+  - `battle.js` 对局搭建（敌将抽取/布场/发牌/胜负/真卡组注入）
+  - `deck.js` 牌组纯逻辑（牌串编解码/迁移/删除）
+  - `reward.js` 奖励纯逻辑（改牌候选/技能过滤/加牌）
+  - `reward_ui.js` 战后三选一浮层
+  - `shop.js` 商店纯逻辑（货单生成/交易守卫）
+  - `shop_ui.js` 商店浮层
+- `tests/` — node 直跑测试（`test_deck.mjs` / `test_reward.mjs` / `test_shop.mjs` / `test_gen.mjs`）
 - `resources/app/game/config.json` — 模式与数值配置
 - `文档/` — 需求、规范、进度、可行性分析、SSS/SRS 等全套文档
 
