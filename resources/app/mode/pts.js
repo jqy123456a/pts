@@ -13,6 +13,8 @@ import { showShopPanel } from "../src/pts/shop_ui.js";
 /* 奖励/商店浮层入口:分别由 ptsRenderResume(战后)与 node.js(进店)触发 */
 game.ptsShowReward = showRewardPanel;
 game.ptsShowShop = showShopPanel;
+/* migrateState 需在 start() 内容函数里调用,必须挂 game 而非裸 import(start 被 StepCompiler 字符串重编译) */
+game.ptsMigrateState = migrateState;
 
 export const type = "mode";
 
@@ -326,7 +328,7 @@ export default () => {
 			var state = game.ptsLoadRun();
 			_status.ptsState = state;
 			if (state) {
-				migrateState(state);
+				game.ptsMigrateState(state);
 			}
 			var flow = null;
 			try {
