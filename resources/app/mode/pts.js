@@ -8,10 +8,11 @@ import { renderMap, toast } from "../src/pts/map/ui.js";
 import { pileTuples, heroSkillsOf, migrateState, clearPtsUI } from "../src/pts/battle.js";
 import { deckFromTuples } from "../src/pts/deck.js";
 import { showRewardPanel } from "../src/pts/reward_ui.js";
+import { showShopPanel } from "../src/pts/shop_ui.js";
 
-/* 商店浮层入口(进入商店节点时由 node.js 触发;Task 7 替换为真实现) */
+/* 奖励/商店浮层入口:分别由 ptsRenderResume(战后)与 node.js(进店)触发 */
 game.ptsShowReward = showRewardPanel;
-game.ptsShowShop = function () {};
+game.ptsShowShop = showShopPanel;
 
 export const type = "mode";
 

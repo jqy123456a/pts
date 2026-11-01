@@ -14,6 +14,7 @@ const ICONS = {
 	chest: "🎁",
 	rest: "🔥",
 	event: "❓",
+	shop: "🛒",
 };
 const NODE_COLOR = {
 	battle: "#8a93a2",
@@ -22,6 +23,7 @@ const NODE_COLOR = {
 	chest: "#e8c268",
 	rest: "#5fd06a",
 	event: "#5fb6ff",
+	shop: "#f0a860",
 };
 
 export function toast(text) {
@@ -65,7 +67,7 @@ export function renderMap(state, edges) {
 		"position:absolute;left:0;top:0;right:0;bottom:0;background:linear-gradient(#20242a,#14161a);z-index:9990;font-family:'Microsoft YaHei',xinwei,sans-serif;color:#e8e4d8;";
 	root.innerHTML =
 		'<div class="pts-hud" style="height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:#101216;border-bottom:1px solid #444;"></div>' +
-		'<div class="pts-hint" style="height:26px;line-height:26px;text-align:center;font-size:13px;color:#9a958a;">沿亮色连线,只能走向下一层;⚔战斗 💀精英 ⛧BOSS 🎁宝箱 🔥篝火 ❓事件</div>' +
+		'<div class="pts-hint" style="height:26px;line-height:26px;text-align:center;font-size:13px;color:#9a958a;">沿亮色连线,只能走向下一层;⚔战斗 💀精英 ⛧BOSS 🎁宝箱 🔥篝火 🛒商店 ❓事件</div>' +
 		'<div class="pts-mapwrap" style="position:absolute;left:0;top:90px;right:0;bottom:0;overflow:auto;">' +
 		'<div class="pts-maprect" style="position:relative;width:' + W + "px;height:" + H + 'px;margin:0 auto;"></div>' +
 		"</div>";
