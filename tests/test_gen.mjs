@@ -75,6 +75,10 @@ for (let i = 0; i < N; i++) {
 				console.log("NO out-edge", seed, l, a.c);
 				fails++;
 			}
+			if (outs.length > 2) {
+				console.log("DENSE out-degree", seed, l, a.c, outs.length);
+				fails++;
+			}
 		}
 	}
 }

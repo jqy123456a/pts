@@ -6,8 +6,8 @@ export const BAL = {
 		layers: 15,
 		minNodes: 2,
 		maxNodes: 4,
-		walkCount: 5,
 		maxSlope: 1,
+		branchProb: 0.25,
 	},
 	fixed: {
 		1: "battle",

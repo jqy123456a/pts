@@ -90,79 +90,48 @@ function _generate(seed, bal) {
 		}
 	}
 
-	// 3) 边:5 条游走路径
+	// 3) 边:自顶向下;先给下层每节点分配 1 入边(合并,按出度最小均衡选源),
+	//    再保底每节点 1 出边,再按 branchProb 分叉;全程出度 ≤2
 	const walked = new Set();
 	const edgeKey = (l, c1, c2) => l + "," + c1 + "," + c2;
-	for (let w = 0; w < bal.map.walkCount; w++) {
-		let cur = layers[0][Math.floor(rnd() * layers[0].length)];
-		for (let l = 1; l < L; l++) {
-			const cand = layers[l].filter((n) => Math.abs(n.col - cur.col) <= slope);
-			const next = cand[Math.floor(rnd() * cand.length)];
-			if (!next) {
+	const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
+	for (let l = 0; l < L - 1; l++) {
+		const nextLayer = layers[l + 1];
+		const outdeg = {};
+		// 入边分配:每下层节点选「出度最小」的上层候选(均衡,避免单节点出度过高)
+		for (const n2 of nextLayer) {
+			const cand = layers[l].filter((n1) => Math.abs(n1.col - n2.col) <= slope);
+			if (!cand.length) {
 				return null;
 			}
-			walked.add(edgeKey(l - 1, cur.c, next.c));
-			cur = next;
+			let best = cand[0];
+			for (const n1 of cand) {
+				if ((outdeg[n1.c] || 0) < (outdeg[best.c] || 0)) {
+					best = n1;
+				}
+			}
+			walked.add(edgeKey(l, best.c, n2.c));
+			outdeg[best.c] = (outdeg[best.c] || 0) + 1;
 		}
-	}
-
-	// 4) 补边:每节点至少一出(BOSS 层除外)、至少一入(首层除外)
-	for (let l = 0; l < L - 1; l++) {
+		// 出边保底 + 分叉
 		for (const node of layers[l]) {
-			let has = false;
-			for (const n2 of layers[l + 1]) {
-				if (walked.has(edgeKey(l, node.c, n2.c))) {
-					has = true;
-					break;
+			const cand = nextLayer.filter((n2) => Math.abs(n2.col - node.col) <= slope);
+			if (!cand.length) {
+				return null;
+			}
+			if ((outdeg[node.c] || 0) === 0) {
+				const n2 = pick(cand);
+				walked.add(edgeKey(l, node.c, n2.c));
+				outdeg[node.c] = 1;
+			}
+			if ((outdeg[node.c] || 0) < 2 && cand.length >= 2 && rnd() < bal.map.branchProb) {
+				const free = cand.filter((n2) => !walked.has(edgeKey(l, node.c, n2.c)));
+				if (free.length) {
+					const n2 = pick(free);
+					walked.add(edgeKey(l, node.c, n2.c));
+					outdeg[node.c] = (outdeg[node.c] || 0) + 1;
 				}
 			}
-			if (!has) {
-				const cand = layers[l + 1].filter((n2) => Math.abs(n2.col - node.col) <= slope);
-				if (!cand.length) {
-					return null;
-				}
-				walked.add(edgeKey(l, node.c, cand[Math.floor(rnd() * cand.length)].c));
-			}
-		}
-	}
-	for (let l = 1; l < L; l++) {
-		for (const node of layers[l]) {
-			let has = false;
-			for (const n1 of layers[l - 1]) {
-				if (walked.has(edgeKey(l - 1, n1.c, node.c))) {
-					has = true;
-					break;
-				}
-			}
-			if (!has) {
-				const cand = layers[l - 1].filter((n1) => Math.abs(n1.col - node.col) <= slope);
-				if (!cand.length) {
-					return null;
-				}
-				walked.add(edgeKey(l - 1, cand[Math.floor(rnd() * cand.length)].c, node.c));
-			}
-		}
-	}
-
-	// 5) 连通性校验:每个首层节点须可到 BOSS
-	const reach = new Set();
-	const stack = [];
-	for (const node of layers[L - 1]) {
-		reach.add((L - 1) + "," + node.c);
-	}
-	for (let l = L - 2; l >= 0; l--) {
-		for (const node of layers[l]) {
-			for (const n2 of layers[l + 1]) {
-				if (walked.has(edgeKey(l, node.c, n2.c)) && reach.has((l + 1) + "," + n2.c)) {
-					reach.add(l + "," + node.c);
-					break;
-				}
-			}
-		}
-	}
-	for (const node of layers[0]) {
-		if (!reach.has("0," + node.c)) {
-			return null;
 		}
 	}
 
