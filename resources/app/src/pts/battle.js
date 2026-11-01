@@ -108,6 +108,19 @@ function ptsTidyBattleUI() {
 		ui.create.system("缩小", function () {
 			zoomBy(-10);
 		});
+		ui.create.system("重新开始", function () {
+			const dialog = ui.create.dialog("重新开始", "确定放弃本局并重新选将吗？");
+			dialog.add([
+				["确定", function () {
+					dialog.close();
+					game.ptsClearRun();
+					game.reload();
+				}],
+				["取消", function () {
+					dialog.close();
+				}],
+			], "textbutton");
+		});
 	}
 }
 game.ptsZoomBy = zoomBy;
