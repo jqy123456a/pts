@@ -269,6 +269,7 @@ game.ptsShowHeroSelect = showHeroSelect;
 /* ---- 开局 ---- */
 function startRun(heroId, hpMax, heroName) {
 	console.log("[pts] run start, hero=" + heroName + " hp=" + hpMax);
+	game.addRecentCharacter(heroId);
 	const seed = (Date.now() & 0xffffffff) >>> 0;
 	const map = genMap(seed, BAL);
 	_status.ptsState = {
