@@ -30,7 +30,7 @@ export function openScreen(title) {
 	root.style.cssText = "position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:2147483000;";
 
 	const panel = document.createElement("div");
-	panel.style.cssText = "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:680px;max-width:92vw;max-height:82vh;display:flex;flex-direction:column;background:#161616;border:1px solid #555;border-radius:12px;color:#eee;font-family:'Microsoft YaHei',sans-serif;overflow:hidden;box-sizing:border-box;";
+	panel.style.cssText = "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:680px;max-width:92vw;min-height:320px;max-height:82vh;display:flex;flex-direction:column;background:#161616;border:1px solid #555;border-radius:12px;color:#eee;overflow:hidden;box-sizing:border-box;";
 
 	const hd = document.createElement("div");
 	hd.style.cssText = "height:56px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;background:#101216;border-bottom:1px solid #444;flex-shrink:0;";
