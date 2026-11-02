@@ -1,5 +1,5 @@
 /* 满屏节点交互层:商店/奖励/宝箱/篝火/事件共用的全屏画面骨架。纯 DOM,无 noname 依赖。
- * 关键定位/背景用内联样式(与 map/ui.js 同法),避免 position:fixed 在缩放变换下失效。 */
+ * 用块级布局(header/body/footer 依次堆叠)避免列 flex 在引擎环境里的塌陷/重叠问题。 */
 
 let styleInjected = false;
 function injectStyle() {
@@ -30,17 +30,17 @@ export function openScreen(title) {
 	root.style.cssText = "position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:2147483000;";
 
 	const panel = document.createElement("div");
-	panel.style.cssText = "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:680px;max-width:92vw;min-height:320px;max-height:82vh;display:flex;flex-direction:column;background:#161616;border:1px solid #555;border-radius:12px;color:#eee;overflow:hidden;box-sizing:border-box;";
+	panel.style.cssText = "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:680px;max-width:92vw;max-height:82vh;background:#161616;border:1px solid #555;border-radius:12px;color:#eee;overflow:hidden;box-sizing:border-box;";
 
 	const hd = document.createElement("div");
-	hd.style.cssText = "height:56px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;background:#101216;border-bottom:1px solid #444;flex-shrink:0;";
+	hd.style.cssText = "height:56px;line-height:56px;text-align:center;font-size:20px;font-weight:bold;background:#101216;border-bottom:1px solid #444;";
 	hd.textContent = title;
 
 	const body = document.createElement("div");
-	body.style.cssText = "flex:1 1 auto;min-height:0;overflow-y:auto;padding:16px 20px;";
+	body.style.cssText = "max-height:calc(82vh - 130px);overflow-y:auto;padding:16px 20px;";
 
 	const footer = document.createElement("div");
-	footer.style.cssText = "display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:12px 20px;border-top:1px solid #444;background:#101216;flex-shrink:0;";
+	footer.style.cssText = "padding:12px 20px;border-top:1px solid #444;background:#101216;text-align:center;";
 
 	panel.appendChild(hd);
 	panel.appendChild(body);
@@ -48,11 +48,6 @@ export function openScreen(title) {
 	root.appendChild(panel);
 	document.body.appendChild(root);
 
-	console.log("[pts:reward] openScreen 面板已建:", title);
-	const rect = panel.getBoundingClientRect();
-	console.log("[pts:reward] panel rect:", JSON.stringify({ x: rect.x, y: rect.y, w: rect.width, h: rect.height, top: rect.top, left: rect.left }));
-	console.log("[pts:reward] root isConnected:", root.isConnected, "parent:", root.parentNode && root.parentNode.tagName);
-	console.log("[pts:reward] panel computed:", getComputedStyle(panel).position, getComputedStyle(panel).width, getComputedStyle(panel).height, getComputedStyle(panel).background, getComputedStyle(panel).zIndex, getComputedStyle(panel).display);
 	return {
 		root: root,
 		body: body,
