@@ -25,9 +25,11 @@ function injectStyle() {
 export function openScreen(title) {
 	injectStyle();
 	const dialog = ui.create.dialog(title);
+	console.log("[pts:reward] openScreen v6 (engine dialog)");
 
 	const body = document.createElement("div");
 	body.className = "pts-dlg";
+	body.dataset.ptsVer = "v6";
 	body.style.width = "100%";
 	body.style.boxSizing = "border-box";
 
