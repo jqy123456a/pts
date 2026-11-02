@@ -19,66 +19,7 @@ class LibInit {
     return this.#promises;
   }
   reset() {
-    if (window.inSplash) {
-      return;
-    }
-    if (window.resetExtension) {
-      if (confirm("游戏似乎未正常载入，有可能因为部分扩展未正常载入，或者因为部分扩展未载入完毕。\n是否禁用扩展并重新打开？")) {
-        window.resetExtension();
-        window.location.reload();
-      }
-    } else {
-      if (lib.device) {
-        if (navigator.notification) {
-          navigator.notification.confirm(
-            "游戏似乎未正常载入，是否重置游戏？",
-            function(index) {
-              if (index == 2) {
-                localStorage.removeItem("noname_inited");
-                window.location.reload();
-              } else if (index == 3) {
-                var noname_inited = localStorage.getItem("noname_inited");
-                var onlineKey2 = localStorage.getItem(lib.configprefix + "key");
-                localStorage.clear();
-                if (noname_inited) {
-                  localStorage.setItem("noname_inited", noname_inited);
-                }
-                if (onlineKey2) {
-                  localStorage.setItem(lib.configprefix + "key", onlineKey2);
-                }
-                if (indexedDB) {
-                  indexedDB.deleteDatabase(lib.configprefix + "data");
-                }
-                setTimeout(function() {
-                  window.location.reload();
-                }, 200);
-              }
-            },
-            "确认退出",
-            ["取消", "重新下载", "重置设置"]
-          );
-        } else {
-          if (confirm("游戏似乎未正常载入，是否重置游戏？")) {
-            localStorage.removeItem("noname_inited");
-            window.location.reload();
-          }
-        }
-      } else {
-        if (confirm("游戏似乎未正常载入，是否重置游戏？")) {
-          var onlineKey = localStorage.getItem(lib.configprefix + "key");
-          localStorage.clear();
-          if (onlineKey) {
-            localStorage.setItem(lib.configprefix + "key", onlineKey);
-          }
-          if (indexedDB) {
-            indexedDB.deleteDatabase(lib.configprefix + "data");
-          }
-          setTimeout(function() {
-            window.location.reload();
-          }, 200);
-        }
-      }
-    }
+    // 爬塔杀:禁用「游戏似乎未正常载入」看门狗弹窗——本作经 service worker JIT 编译加载较慢,该检测会误报打断游戏,直接跳过。
   }
   startOnline = [
     async (event) => {

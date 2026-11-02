@@ -1,5 +1,6 @@
 /* 满屏节点交互层:商店/奖励/宝箱/篝火/事件共用的全屏画面骨架。纯 DOM,无 noname 依赖。
- * 块级布局(header/body/footer 依次堆叠);按钮样式全内联(不依赖 <style> 注入),footer 用 Flexbox 水平居中+磨砂背景。 */
+ * 样式一律逐属性赋值(style.height=...),不用 cssText 整串(引擎环境下不可靠)。
+ * ⚠ panel 的 min-height 是可见性的关键,改动布局时不得删除。 */
 
 let styleInjected = false;
 function injectStyle() {
@@ -23,20 +24,54 @@ export function openScreen(title) {
 
 	const root = document.createElement("div");
 	root.className = "pts-screen";
-	root.style.cssText = "position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:2147483000;";
+	root.style.position = "absolute";
+	root.style.left = "0";
+	root.style.top = "0";
+	root.style.right = "0";
+	root.style.bottom = "0";
+	root.style.background = "rgba(0,0,0,.7)";
+	root.style.zIndex = "2147483000";
 
 	const panel = document.createElement("div");
-	panel.style.cssText = "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:680px;max-width:92vw;min-height:360px;max-height:82vh;background:#161616;border:1px solid #555;border-radius:12px;color:#eee;overflow:hidden;box-sizing:border-box;";
+	panel.style.position = "absolute";
+	panel.style.left = "50%";
+	panel.style.top = "50%";
+	panel.style.transform = "translate(-50%,-50%)";
+	panel.style.width = "680px";
+	panel.style.maxWidth = "92vw";
+	panel.style.minHeight = "360px";
+	panel.style.maxHeight = "82vh";
+	panel.style.background = "#161616";
+	panel.style.border = "1px solid #555";
+	panel.style.borderRadius = "12px";
+	panel.style.color = "#eee";
+	panel.style.overflow = "hidden";
+	panel.style.boxSizing = "border-box";
 
 	const hd = document.createElement("div");
-	hd.style.cssText = "height:56px;line-height:56px;text-align:center;font-size:20px;font-weight:bold;background:#101216;border-bottom:1px solid #444;";
+	hd.style.height = "56px";
+	hd.style.lineHeight = "56px";
+	hd.style.textAlign = "center";
+	hd.style.fontSize = "20px";
+	hd.style.fontWeight = "bold";
+	hd.style.background = "#101216";
+	hd.style.borderBottom = "1px solid #444";
+	hd.style.boxSizing = "border-box";
 	hd.textContent = title;
 
 	const body = document.createElement("div");
-	body.style.cssText = "overflow-y:auto;padding:16px 20px;";
+	body.style.overflowY = "auto";
+	body.style.padding = "16px 20px";
 
 	const footer = document.createElement("div");
-	footer.style.cssText = "display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);";
+	footer.style.display = "flex";
+	footer.style.justifyContent = "center";
+	footer.style.alignItems = "center";
+	footer.style.gap = "12px";
+	footer.style.flexWrap = "wrap";
+	footer.style.padding = "14px 20px";
+	footer.style.borderTop = "1px solid rgba(255,255,255,.08)";
+	footer.style.background = "rgba(255,255,255,.04)";
 
 	panel.appendChild(hd);
 	panel.appendChild(body);
@@ -55,9 +90,18 @@ export function openScreen(title) {
 export function screenButton(label, onclick, disabled, full) {
 	const b = document.createElement("button");
 	b.textContent = label;
-	b.style.cssText = "padding:10px 20px;font-size:15px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#eee;border-radius:10px;cursor:pointer;";
+	b.style.padding = "10px 20px";
+	b.style.fontSize = "15px";
+	b.style.border = "1px solid rgba(255,255,255,.22)";
+	b.style.background = "rgba(255,255,255,.08)";
+	b.style.color = "#eee";
+	b.style.borderRadius = "10px";
+	b.style.cursor = "pointer";
 	if (full) {
-		b.style.cssText += "display:block;width:100%;box-sizing:border-box;margin-bottom:8px;";
+		b.style.display = "block";
+		b.style.width = "100%";
+		b.style.boxSizing = "border-box";
+		b.style.marginBottom = "8px";
 	}
 	if (disabled) {
 		b.disabled = true;
