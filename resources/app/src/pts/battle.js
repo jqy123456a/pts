@@ -241,7 +241,6 @@ game.ptsAssignPlayers = function () {
 	state.skills.forEach(function (id) {
 		game.me.addSkill(id);
 	});
-	game.me.directgain(get.cards(4));
 	for (let i = 1; i < game.players.length; i++) {
 		const p = game.players[i];
 		p.getId();
@@ -253,7 +252,6 @@ game.ptsAssignPlayers = function () {
 			p.hp = p.maxHp;
 			p.update();
 		}
-		p.directgain(get.cards(4));
 		if (p.ai) {
 			p.ai.shown = 1;
 		}
