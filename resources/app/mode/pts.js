@@ -313,6 +313,7 @@ game.ptsRenderResume = function () {
 	}
 	renderMap(s, s.edges);
 	if (s.rewardPending) {
+		console.log("[pts:reward] renderResume 触发 showReward, rewardPending=", JSON.stringify(s.rewardPending));
 		game.ptsShowReward();
 	}
 };

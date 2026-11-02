@@ -10,6 +10,7 @@ function tName(id) { return lib.translate[id] || id; }
 
 export function showRewardPanel() {
 	const state = _status.ptsState;
+	console.log("[pts:reward] showRewardPanel 进入, state=", !!state, "rewardPending=", state && state.rewardPending);
 	if (!state || !state.rewardPending) { return; }
 	state.deck = state.deck || [];
 	state.skills = state.skills || [];

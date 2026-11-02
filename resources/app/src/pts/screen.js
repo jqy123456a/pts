@@ -20,6 +20,7 @@ export function openScreen(title) {
 		+ '</style><div class="panel"><div class="hd"></div><div class="body"></div><div class="footer"></div></div>';
 	root.querySelector(".hd").textContent = title;
 	document.body.appendChild(root);
+	console.log("[pts:reward] openScreen 面板已建:", title);
 	return {
 		root: root,
 		body: root.querySelector(".body"),

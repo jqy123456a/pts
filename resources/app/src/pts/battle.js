@@ -287,10 +287,16 @@ game.ptsCheckResult = function () {
 		state.pendingEnemies = null;
 		game.ptsSaveRun();
 		game.ptsRemoveRestartButtons();
-		game.over(false);
+		console.log("[pts:reward] 战败, 即将 reload");
 		setTimeout(function () {
+			console.log("[pts:reward] 战败 reload 执行");
 			game.reload();
 		}, 1500);
+		try {
+			game.over(false);
+		} catch (e) {
+			console.error("[pts:reward] game.over(false) 抛错", e);
+		}
 		return;
 	}
 	const foes = game.players.filter(function (p) {
@@ -323,10 +329,16 @@ game.ptsCheckResult = function () {
 	game.ptsFlowSave();
 	game.ptsSaveRun();
 	game.ptsRemoveRestartButtons();
-	game.over(true);
+	console.log("[pts:reward] 胜利, rewardPending=", JSON.stringify(state.rewardPending), " 即将 reload");
 	setTimeout(function () {
+		console.log("[pts:reward] 胜利 reload 执行");
 		game.reload();
 	}, 1500);
+	try {
+		game.over(true);
+	} catch (e) {
+		console.error("[pts:reward] game.over(true) 抛错", e);
+	}
 };
 
 export { clearPtsUI };
