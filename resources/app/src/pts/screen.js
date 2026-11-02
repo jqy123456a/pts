@@ -28,7 +28,12 @@ export function openScreen(title) {
 
 	const body = document.createElement("div");
 	body.className = "pts-dlg";
+	body.style.width = "100%";
+	body.style.boxSizing = "border-box";
+
 	const footer = document.createElement("div");
+	footer.style.width = "100%";
+	footer.style.boxSizing = "border-box";
 	footer.style.display = "flex";
 	footer.style.justifyContent = "center";
 	footer.style.alignItems = "center";

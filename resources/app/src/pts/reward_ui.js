@@ -64,7 +64,7 @@ export function showRewardPanel() {
 		body.innerHTML = "";
 		const h = document.createElement("div");
 		h.textContent = "第 " + (groups + 1) + "/" + cap + " 组,4 张→1 张:";
-		h.style.cssText = "color:#9a958a;margin-bottom:10px;";
+		h.style.cssText = "text-align:center;color:#9a958a;margin-bottom:10px;";
 		body.appendChild(h);
 		for (const r of list) {
 			const card = document.createElement("div");
