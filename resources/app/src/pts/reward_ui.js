@@ -11,9 +11,24 @@ function tName(id) { return lib.translate[id] || id; }
 export function showRewardPanel() {
 	const state = _status.ptsState;
 	if (!state || !state.rewardPending) { return; }
+	state.deck = state.deck || [];
+	state.skills = state.skills || [];
+	state.heroSkills = state.heroSkills || [];
 	const cap = BAL.groupsPerReward;
 	let groups = 0;
-	const opts = () => rewardOptions(state, state.rewardPending ? state.rewardPending.type : "battle");
+	const opts = () => {
+		try {
+			return rewardOptions(state, state.rewardPending ? state.rewardPending.type : "battle");
+		} catch (e) {
+			console.error("[pts] rewardOptions error", e);
+			return [
+				{ key: "recipe", ok: false, data: [], cap: cap },
+				{ key: "skill", ok: false, data: [], poolKey: "common" },
+				{ key: "card", ok: true, data: null },
+				{ key: "skip", ok: true, data: null },
+			];
+		}
+	};
 	const s = openScreen("战后奖励");
 	const body = s.body;
 	const footer = s.footer;

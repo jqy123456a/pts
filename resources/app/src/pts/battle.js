@@ -25,10 +25,21 @@ export function pileTuples() {
 	return out;
 }
 
-/* 英雄自带技能(供奖励过滤;引擎 init 会代发一次,不重复挂)。 */
+/* 英雄自带技能(供奖励过滤;引擎 init 会代发一次,不重复挂)。扁平化嵌套数组。 */
 export function heroSkillsOf(id) {
 	const info = lib.character[id];
-	return info && Array.isArray(info[3]) ? info[3].slice() : [];
+	if (!info || !Array.isArray(info[3])) {
+		return [];
+	}
+	const out = [];
+	for (const s of info[3]) {
+		if (Array.isArray(s)) {
+			out.push.apply(out, s);
+		} else {
+			out.push(s);
+		}
+	}
+	return out;
 }
 
 /* 旧档迁移:M4 前存档补齐 deck/skills/heroSkills/rewardPending/shopInv。 */
