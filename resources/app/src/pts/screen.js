@@ -6,9 +6,9 @@ export function openScreen(title) {
 	const root = document.createElement("div");
 	root.className = "pts-screen";
 	root.innerHTML = '<style>.pts-screen{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.65);z-index:99999}'
-		+ '.pts-screen .panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92%,680px);max-height:82%;display:flex;flex-direction:column;background:#161616;border:1px solid #555;border-radius:12px;color:#eee;font-family:"Microsoft YaHei",xinwei,sans-serif;overflow:hidden}'
+		+ '.pts-screen .panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:680px;max-width:92%;max-height:82%;display:flex;flex-direction:column;background:#161616;border:1px solid #555;border-radius:12px;color:#eee;font-family:"Microsoft YaHei",xinwei,sans-serif;overflow:hidden}'
 		+ '.pts-screen .hd{height:56px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;background:#101216;border-bottom:1px solid #444;flex-shrink:0}'
-		+ '.pts-screen .body{flex:1;overflow:auto;padding:16px 20px}'
+		+ '.pts-screen .body{flex:1 1 auto;min-height:0;overflow:auto;padding:16px 20px}'
 		+ '.pts-screen .footer{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:12px 20px;border-top:1px solid #444;background:#101216;flex-shrink:0}'
 		+ '.pts-screen button{padding:10px 18px;font-size:15px;border:1px solid #666;background:#222;color:#eee;border-radius:8px;cursor:pointer}'
 		+ '.pts-screen button:hover{background:#333}'
