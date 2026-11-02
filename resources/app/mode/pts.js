@@ -323,19 +323,8 @@ game.ptsRenderResume = function () {
 export default () => {
 	patchAttitude();
 	game.no_continue_game = true;
-	game.addOverDialog = function (dialog) {
-		game._overDialog = dialog;
-	};
-	game.controlOver = function () {
-		const dialog = game._overDialog;
-		game._overDialog = null;
-		if (dialog) {
-			dialog.add([["继续", function () {
-				dialog.close();
-				game.reload();
-			}]], "textbutton");
-		}
-	};
+	/* 空 controlOver:跳过非名结算框默认的「再战/restart」按钮,胜负后由 battle.js 的 setTimeout 自动 game.reload 进入下一步 */
+	game.controlOver = function () {};
 	return {
 		name: "pts",
 		start() {

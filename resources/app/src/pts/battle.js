@@ -4,9 +4,26 @@
 import { lib, game, ui, get, _status } from "noname";
 import { BAL } from "./balance.js";
 import { deckFromTuples } from "./deck.js";
+import { openScreen, screenButton } from "./screen.js";
 
 function rndInRange(r) {
 	return r[0] + Math.floor(Math.random() * (r[1] - r[0] + 1));
+}
+
+/* 二次确认满屏框(替代非名 dialog.textbutton,按钮格式易错) */
+function confirmScreen(title, msg, onConfirm) {
+	const s = openScreen(title);
+	const div = document.createElement("div");
+	div.textContent = msg;
+	div.style.cssText = "text-align:center;padding:20px 0;font-size:16px;";
+	s.body.appendChild(div);
+	s.footer.appendChild(screenButton("确定", function () {
+		s.close();
+		onConfirm();
+	}));
+	s.footer.appendChild(screenButton("取消", function () {
+		s.close();
+	}));
 }
 
 /* 从引擎当前牌堆定义(lib.card.list)抓元组快照 [suit, number, name, nature?]。
@@ -121,30 +138,16 @@ function ptsTidyBattleUI() {
 		});
 		game.ptsRestartButtons = [
 			ui.create.system("重开本场", function () {
-				const dialog = ui.create.dialog("重开本场", "确定重新开始本场战斗吗？(恢复到进场前状态)");
-				dialog.add([
-					["确定", function () {
-						dialog.close();
-						game.ptsFlowSave();
-						game.reload();
-					}],
-					["取消", function () {
-						dialog.close();
-					}],
-				], "textbutton");
+				confirmScreen("重开本场", "确定重新开始本场战斗吗？(恢复到进场前状态)", function () {
+					game.ptsFlowSave();
+					game.reload();
+				});
 			}),
 			ui.create.system("重开整局", function () {
-				const dialog = ui.create.dialog("重开整局", "确定放弃本局并重新选将吗？");
-				dialog.add([
-					["确定", function () {
-						dialog.close();
-						game.ptsClearRun();
-						game.reload();
-					}],
-					["取消", function () {
-						dialog.close();
-					}],
-				], "textbutton");
+				confirmScreen("重开整局", "确定放弃本局并重新选将吗？", function () {
+					game.ptsClearRun();
+					game.reload();
+				});
 			}),
 		];
 	}
@@ -285,6 +288,9 @@ game.ptsCheckResult = function () {
 		game.ptsSaveRun();
 		game.ptsRemoveRestartButtons();
 		game.over(false);
+		setTimeout(function () {
+			game.reload();
+		}, 1500);
 		return;
 	}
 	const foes = game.players.filter(function (p) {
@@ -318,6 +324,9 @@ game.ptsCheckResult = function () {
 	game.ptsSaveRun();
 	game.ptsRemoveRestartButtons();
 	game.over(true);
+	setTimeout(function () {
+		game.reload();
+	}, 1500);
 };
 
 export { clearPtsUI };
