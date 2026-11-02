@@ -321,6 +321,9 @@ game.ptsRenderResume = function () {
 /* ---- 模式主体 ---- */
 export default () => {
 	patchAttitude();
+	lib.config.game_speed = "vfast";
+	lib.config.duration = 400;
+	game.no_continue_game = true;
 	return {
 		name: "pts",
 		start() {
@@ -383,6 +386,7 @@ export default () => {
 		translation: {
 			pts: "爬塔杀",
 			pts_config: "爬塔杀选项",
+			restart: "继续",
 		},
 	};
 };
