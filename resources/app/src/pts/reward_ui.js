@@ -63,30 +63,23 @@ export function showRewardPanel() {
 		const list = opts()[0].data;
 		body.innerHTML = "";
 		const h = document.createElement("div");
-		h.textContent = "第 " + (groups + 1) + "/" + cap + " 组,4 张→1 张:";
+		h.textContent = "改牌 第 " + (groups + 1) + "/" + cap + " 组(4 张 → 1 张)";
 		h.style.cssText = "text-align:center;color:#9a958a;margin-bottom:10px;";
 		body.appendChild(h);
 		for (const r of list) {
-			const card = document.createElement("div");
-			card.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1a1e24;border:1px solid #3a3f46;border-radius:10px;padding:12px 16px;margin-bottom:8px;";
-			const lbl = document.createElement("div");
-			lbl.style.flex = "1";
-			lbl.style.textAlign = "left";
-			lbl.textContent = "「" + tName(r.from) + "」x4 →";
-			const acts = document.createElement("div");
-			acts.style.display = "flex";
-			acts.style.gap = "8px";
-			acts.style.flexShrink = "0";
 			if (r.toEach) {
 				for (const nature of r.toEach) {
-					acts.appendChild(screenButton(nature === "fire" ? "🔥火杀" : "⚡雷杀", () => apply(r, nature)));
+					body.appendChild(screenButton(
+						"「" + tName(r.from) + "」x4 → " + (nature === "fire" ? "🔥火杀" : "⚡雷杀"),
+						() => apply(r, nature), false, true
+					));
 				}
 			} else {
-				acts.appendChild(screenButton(tName(r.to), () => apply(r, null)));
+				body.appendChild(screenButton(
+					"「" + tName(r.from) + "」x4 → 「" + tName(r.to) + "」",
+					() => apply(r, null), false, true
+				));
 			}
-			card.appendChild(lbl);
-			card.appendChild(acts);
-			body.appendChild(card);
 		}
 		footer.innerHTML = "";
 		footer.appendChild(screenButton("⟵ 返回", main));
