@@ -1,7 +1,9 @@
-/* 满屏节点交互层:商店/奖励/宝箱/篝火/事件共用的全屏画面骨架。纯 DOM,无 noname 依赖。
- * 样式一律逐属性赋值(style.height=...),不用 cssText 整串(引擎环境下不可靠)。
- * 尺寸按游戏界面缩放(game.ptsGetZoom)反向抵消,面板始终保持固定屏幕大小。
- * ⚠ panel 的 min-height 是可见性的关键,改动布局时不得删除。 */
+/* 满屏节点交互层:商店/奖励/宝箱/篝火/事件共用弹窗。
+ * 改用引擎自带 dialog 体系(ui.create.dialog)——与选将/结算同一套 UI,
+ * 天然跟随界面缩放移动位置、自动居中、内容常规文档流绝不重叠。
+ * 打开时隐藏地图层,关闭时恢复。 */
+
+import { ui } from "noname";
 
 let styleInjected = false;
 function injectStyle() {
@@ -12,113 +14,68 @@ function injectStyle() {
 	const st = document.createElement("style");
 	st.id = "pts-screen-style";
 	st.innerHTML = [
-		".pts-screen .card{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1a1e24;border:1px solid #3a3f46;border-radius:10px;padding:12px 16px;margin-bottom:8px;}",
-		".pts-screen .card .lbl{flex:1;}",
-		".pts-screen .card .acts{display:flex;gap:8px;flex-shrink:0;}",
+		".pts-dlg{overflow-y:auto;}",
+		".pts-dlg .card{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1a1e24;border:1px solid #3a3f46;border-radius:10px;padding:12px 16px;margin-bottom:8px;}",
+		".pts-dlg .card .lbl{flex:1;}",
+		".pts-dlg .card .acts{display:flex;gap:8px;flex-shrink:0;}",
 	].join("");
 	document.head.appendChild(st);
 }
 
-/* 设计稿像素 → 实际 CSS 像素(除以界面缩放,防御异常值) */
-function uiPx(v) {
-	let z = 1;
-	try {
-		if (typeof window.ptsGetZoom === "function") {
-			z = window.ptsGetZoom() || 1;
-		}
-	} catch (e) {
-		z = 1;
-	}
-	if (!(z >= 0.5 && z <= 5)) {
-		z = 1;
-	}
-	return Math.round(v / z) + "px";
-}
-
 export function openScreen(title) {
 	injectStyle();
-	document.querySelectorAll(".pts-screen").forEach((e) => e.remove());
-
-	const root = document.createElement("div");
-	root.className = "pts-screen";
-	root.style.position = "absolute";
-	root.style.left = "0";
-	root.style.top = "0";
-	root.style.right = "0";
-	root.style.bottom = "0";
-	root.style.background = "rgba(0,0,0,.7)";
-	root.style.zIndex = "2147483000";
-
-	const panel = document.createElement("div");
-	panel.style.position = "absolute";
-	panel.style.left = "50%";
-	panel.style.top = "50%";
-	panel.style.transform = "translate(-50%,-50%)";
-	panel.style.width = uiPx(680);
-	panel.style.maxWidth = "92vw";
-	panel.style.minHeight = uiPx(360);
-	panel.style.maxHeight = "82vh";
-	panel.style.background = "#161616";
-	panel.style.border = "1px solid #555";
-	panel.style.borderRadius = "12px";
-	panel.style.color = "#eee";
-	panel.style.overflow = "hidden";
-	panel.style.boxSizing = "border-box";
-
-	const hd = document.createElement("div");
-	hd.style.height = uiPx(56);
-	hd.style.lineHeight = uiPx(56);
-	hd.style.textAlign = "center";
-	hd.style.fontSize = uiPx(20);
-	hd.style.fontWeight = "bold";
-	hd.style.background = "#101216";
-	hd.style.borderBottom = "1px solid #444";
-	hd.style.boxSizing = "border-box";
-	hd.textContent = title;
+	const dialog = ui.create.dialog(title);
 
 	const body = document.createElement("div");
-	body.style.overflowY = "auto";
-	body.style.padding = uiPx(16) + " " + uiPx(20);
-
+	body.className = "pts-dlg";
 	const footer = document.createElement("div");
 	footer.style.display = "flex";
 	footer.style.justifyContent = "center";
 	footer.style.alignItems = "center";
-	footer.style.gap = uiPx(12);
+	footer.style.gap = "12px";
 	footer.style.flexWrap = "wrap";
-	footer.style.padding = uiPx(14) + " " + uiPx(20);
-	footer.style.borderTop = "1px solid rgba(255,255,255,.08)";
-	footer.style.background = "rgba(255,255,255,.04)";
+	footer.style.padding = "14px 0 0 0";
 
-	panel.appendChild(hd);
-	panel.appendChild(body);
-	panel.appendChild(footer);
-	root.appendChild(panel);
-	document.body.appendChild(root);
+	dialog.add([
+		function (d) {
+			const mapEl = document.querySelector(".pts-root");
+			if (mapEl) {
+				mapEl.style.display = "none";
+			}
+			d.content.appendChild(body);
+			d.content.appendChild(footer);
+		},
+		"handle",
+	]);
 
 	return {
-		root: root,
 		body: body,
 		footer: footer,
-		close: function () { root.remove(); },
+		close: function () {
+			const mapEl = document.querySelector(".pts-root");
+			if (mapEl) {
+				mapEl.style.display = "";
+			}
+			dialog.close();
+		},
 	};
 }
 
 export function screenButton(label, onclick, disabled, full) {
 	const b = document.createElement("button");
 	b.textContent = label;
-	b.style.padding = uiPx(10) + " " + uiPx(20);
-	b.style.fontSize = uiPx(15);
+	b.style.padding = "10px 20px";
+	b.style.fontSize = "15px";
 	b.style.border = "1px solid rgba(255,255,255,.22)";
 	b.style.background = "rgba(255,255,255,.08)";
 	b.style.color = "#eee";
-	b.style.borderRadius = uiPx(10);
+	b.style.borderRadius = "10px";
 	b.style.cursor = "pointer";
 	if (full) {
 		b.style.display = "block";
 		b.style.width = "100%";
 		b.style.boxSizing = "border-box";
-		b.style.marginBottom = uiPx(8);
+		b.style.marginBottom = "8px";
 	}
 	if (disabled) {
 		b.disabled = true;
