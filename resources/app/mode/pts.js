@@ -323,6 +323,19 @@ game.ptsRenderResume = function () {
 export default () => {
 	patchAttitude();
 	game.no_continue_game = true;
+	game.addOverDialog = function (dialog) {
+		game._overDialog = dialog;
+	};
+	game.controlOver = function () {
+		const dialog = game._overDialog;
+		game._overDialog = null;
+		if (dialog) {
+			dialog.add([["继续", function () {
+				dialog.close();
+				game.reload();
+			}]], "textbutton");
+		}
+	};
 	return {
 		name: "pts",
 		start() {
@@ -385,7 +398,6 @@ export default () => {
 		translation: {
 			pts: "爬塔杀",
 			pts_config: "爬塔杀选项",
-			restart: "继续",
 		},
 	};
 };

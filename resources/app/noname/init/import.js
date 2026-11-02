@@ -23,12 +23,8 @@ async function importExtension(name) {
     await importFunction("extension", `/extension/${name}/extension`);
   } catch (e) {
     console.error(`扩展《${name}》加载失败`, e);
-    let close = confirm(`扩展《${name}》加载失败，是否关闭此扩展？错误信息: 
-${e instanceof Error ? e.stack : String(e)}`);
-    if (close) {
-      game.saveConfig(`extension_${name}_enable`, false);
-      await game.import("extension", await createEmptyExtension(name));
-    }
+    game.saveConfig(`extension_${name}_enable`, false);
+    await game.import("extension", await createEmptyExtension(name));
   }
 }
 async function importMode(name) {
