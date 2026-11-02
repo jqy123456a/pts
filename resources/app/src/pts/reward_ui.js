@@ -51,11 +51,11 @@ export function showRewardPanel() {
 		sub.textContent = groups ? "(本局改牌 " + groups + "/" + cap + " 组)" : "";
 		sub.style.cssText = "text-align:center;color:#9a958a;margin-bottom:10px;";
 		body.appendChild(sub);
-		if (cur[0].ok) { body.appendChild(screenButton("🔄 改牌方案", recipeV)); }
-		else { body.appendChild(screenButton("🔄 改牌(无方案→加牌)", doCard)); }
-		if (cur[1].ok) { body.appendChild(screenButton("✨ 技能", skillV)); }
-		else { body.appendChild(screenButton("✨ 技能(池已拿空)", () => {}, true)); }
-		body.appendChild(screenButton("🃏 加牌", doCard));
+		if (cur[0].ok) { body.appendChild(screenButton("🔄 改牌方案", recipeV, false, true)); }
+		else { body.appendChild(screenButton("🔄 改牌(无方案→加牌)", doCard, false, true)); }
+		if (cur[1].ok) { body.appendChild(screenButton("✨ 技能", skillV, false, true)); }
+		else { body.appendChild(screenButton("✨ 技能(池已拿空)", () => {}, true, true)); }
+		body.appendChild(screenButton("🃏 加牌", doCard, false, true));
 		footer.innerHTML = "";
 		footer.appendChild(screenButton("⏭ 跳过", () => close("已跳过本次奖励")));
 	}
@@ -101,7 +101,7 @@ export function showRewardPanel() {
 			body.appendChild(screenButton("✨ " + tName(id), () => {
 				const res = grantSkill(state, id);
 				close(res.msg);
-			}));
+			}, false, true));
 		}
 		footer.innerHTML = "";
 		footer.appendChild(screenButton("⟵ 返回", main));
