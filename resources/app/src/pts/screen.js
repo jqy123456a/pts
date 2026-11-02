@@ -49,6 +49,10 @@ export function openScreen(title) {
 	document.body.appendChild(root);
 
 	console.log("[pts:reward] openScreen 面板已建:", title);
+	const rect = panel.getBoundingClientRect();
+	console.log("[pts:reward] panel rect:", JSON.stringify({ x: rect.x, y: rect.y, w: rect.width, h: rect.height, top: rect.top, left: rect.left }));
+	console.log("[pts:reward] root isConnected:", root.isConnected, "parent:", root.parentNode && root.parentNode.tagName);
+	console.log("[pts:reward] panel computed:", getComputedStyle(panel).position, getComputedStyle(panel).width, getComputedStyle(panel).height, getComputedStyle(panel).background, getComputedStyle(panel).zIndex, getComputedStyle(panel).display);
 	return {
 		root: root,
 		body: body,
