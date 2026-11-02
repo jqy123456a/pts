@@ -1,5 +1,5 @@
 /* 满屏节点交互层:商店/奖励/宝箱/篝火/事件共用的全屏画面骨架。纯 DOM,无 noname 依赖。
- * 用块级布局(header/body/footer 依次堆叠)避免列 flex 在引擎环境里的塌陷/重叠问题。 */
+ * 块级布局(header/body/footer 依次堆叠)+ min-height 保证可见,避免列 flex 的塌陷/重叠问题。 */
 
 let styleInjected = false;
 function injectStyle() {
@@ -30,14 +30,14 @@ export function openScreen(title) {
 	root.style.cssText = "position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:2147483000;";
 
 	const panel = document.createElement("div");
-	panel.style.cssText = "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:680px;max-width:92vw;max-height:82vh;background:#161616;border:1px solid #555;border-radius:12px;color:#eee;overflow:hidden;box-sizing:border-box;";
+	panel.style.cssText = "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:680px;max-width:92vw;min-height:360px;max-height:82vh;background:#161616;border:1px solid #555;border-radius:12px;color:#eee;overflow:hidden;box-sizing:border-box;";
 
 	const hd = document.createElement("div");
 	hd.style.cssText = "height:56px;line-height:56px;text-align:center;font-size:20px;font-weight:bold;background:#101216;border-bottom:1px solid #444;";
 	hd.textContent = title;
 
 	const body = document.createElement("div");
-	body.style.cssText = "max-height:calc(82vh - 130px);overflow-y:auto;padding:16px 20px;";
+	body.style.cssText = "overflow-y:auto;padding:16px 20px;";
 
 	const footer = document.createElement("div");
 	footer.style.cssText = "padding:12px 20px;border-top:1px solid #444;background:#101216;text-align:center;";
