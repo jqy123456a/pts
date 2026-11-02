@@ -776,7 +776,9 @@ async function loadConfig() {
   get$1("all").cards = [];
   get$1("all").plays = [];
   get$1("all").mode = [];
-  set("duration", 500);
+  set("duration", 400);
+  set("game_speed", "vfast");
+  set("ignore_error", true);
   if (!get$1("gameRecord")) set("gameRecord", {});
   return result;
 }

@@ -321,8 +321,6 @@ game.ptsRenderResume = function () {
 /* ---- 模式主体 ---- */
 export default () => {
 	patchAttitude();
-	lib.config.game_speed = "vfast";
-	lib.config.duration = 400;
 	game.no_continue_game = true;
 	return {
 		name: "pts",
