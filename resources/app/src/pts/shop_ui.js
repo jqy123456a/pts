@@ -1,4 +1,5 @@
-/* 商店满屏画面(FR-15)。读 state.shopInv;交易守卫走 shop.js 纯函数;由 pts.js 挂载为 game.ptsShowShop。 */
+/* 商店弹窗(FR-15)。读 state.shopInv;交易守卫走 shop.js 纯函数;由 pts.js 挂载为 game.ptsShowShop。
+ * 排版与战后奖励统一:居中标题 + 整行按钮堆叠(引擎 dialog 体系)。 */
 import { lib, game, _status } from "noname";
 import { tradeState } from "./shop.js";
 import { kindsOf, count } from "./deck.js";
@@ -25,15 +26,18 @@ export function showShopPanel() {
 		persist();
 		toast("离开商店");
 	}
-	function itemLabel(it) {
-		if (it.kind === "recipe") {
-			return "🔄 改牌「" + tName(it.recipe.from) + "」x4 →" + (it.recipe.toEach ? "🔥火杀/⚡雷杀" : "「" + tName(it.recipe.to) + "」") + "(" + it.price + "金)";
-		}
-		if (it.kind === "skill") { return "✨ 技能「" + tName(it.skillId) + "」(" + it.price + "金)"; }
-		if (it.kind === "skillE") { return "🌟 精英技「" + tName(it.skillId) + "」(" + it.price + "金)"; }
-		if (it.kind === "addCard") { return "🃏 随机加牌(" + it.price + "金)"; }
-		if (it.kind === "heal") { return "❤ 回 1 点体力(" + it.price + "金)"; }
-		return "🗑 同类牌全删(" + it.price + "金)";
+	function baseLabel(it) {
+		if (it.kind === "skill") { return "✨ 技能「" + tName(it.skillId) + "」"; }
+		if (it.kind === "skillE") { return "🌟 精英技「" + tName(it.skillId) + "」"; }
+		if (it.kind === "addCard") { return "🃏 随机加牌"; }
+		if (it.kind === "heal") { return "❤ 回 1 点体力"; }
+		return "🗑 同类牌全删";
+	}
+	function heading(text) {
+		const h = document.createElement("div");
+		h.textContent = text;
+		h.style.cssText = "text-align:center;color:#9a958a;margin-bottom:10px;";
+		body.appendChild(h);
 	}
 	function buy(it, sel) {
 		const res = tradeState(state, it, sel);
@@ -43,60 +47,31 @@ export function showShopPanel() {
 	}
 	function renderRow() {
 		body.innerHTML = "";
-		const gold = document.createElement("div");
-		gold.textContent = "持有金币:" + state.gold;
-		gold.style.cssText = "text-align:right;color:#e8c268;margin-bottom:10px;font-size:16px;";
-		body.appendChild(gold);
+		heading("持有金币:" + state.gold);
 		for (const it of state.shopInv) {
-			const card = document.createElement("div");
-			card.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1a1e24;border:1px solid #3a3f46;border-radius:10px;padding:12px 16px;margin-bottom:8px;";
-			const lbl = document.createElement("div");
-			lbl.style.flex = "1";
-			lbl.style.textAlign = "left";
-			lbl.textContent = itemLabel(it);
-			if (it.sold) { lbl.style.opacity = "0.4"; }
-			const acts = document.createElement("div");
-			acts.style.display = "flex";
-			acts.style.gap = "8px";
-			acts.style.flexShrink = "0";
 			if (it.sold) {
-				acts.appendChild(screenButton("已售罄", () => {}, true));
-			} else if (it.kind === "recipe" && it.recipe.toEach) {
-				acts.appendChild(screenButton("🔥火杀", () => buy(it, { nature: "fire" })));
-				acts.appendChild(screenButton("⚡雷杀", () => buy(it, { nature: "thunder" })));
-			} else if (it.kind === "bulk") {
-				acts.appendChild(screenButton("选牌名…", () => bulkV(it)));
-			} else {
-				acts.appendChild(screenButton("购买", () => buy(it, null)));
+				body.appendChild(screenButton(baseLabel(it) + "(已售罄)", () => {}, true, true));
+				continue;
 			}
-			card.appendChild(lbl);
-			card.appendChild(acts);
-			body.appendChild(card);
+			const poor = state.gold < it.price;
+			if (it.kind === "recipe" && it.recipe.toEach) {
+				const from = "🔄 改牌「" + tName(it.recipe.from) + "」x4 → ";
+				body.appendChild(screenButton(from + "🔥火杀(" + it.price + "金)", () => buy(it, { nature: "fire" }), poor, true));
+				body.appendChild(screenButton(from + "⚡雷杀(" + it.price + "金)", () => buy(it, { nature: "thunder" }), poor, true));
+			} else if (it.kind === "bulk") {
+				body.appendChild(screenButton("🗑 同类牌全删(" + it.price + "金)", () => bulkV(it), poor, true));
+			} else {
+				body.appendChild(screenButton(baseLabel(it) + "(" + it.price + "金)", () => buy(it, null), poor, true));
+			}
 		}
 		footer.innerHTML = "";
 		footer.appendChild(screenButton("🚪 离开", leave));
 	}
 	function bulkV(it) {
 		body.innerHTML = "";
-		const tip = document.createElement("div");
-		tip.textContent = "选一种要删的牌(每删留 1 张):";
-		tip.style.cssText = "color:#9a958a;margin-bottom:10px;";
-		body.appendChild(tip);
+		heading("同类牌全删(每删留 1 张) — " + it.price + "金");
 		for (const kind of kindsOf(state.deck)) {
-			const card = document.createElement("div");
-			card.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1a1e24;border:1px solid #3a3f46;border-radius:10px;padding:12px 16px;margin-bottom:8px;";
-			const lbl = document.createElement("div");
-			lbl.style.flex = "1";
-			lbl.style.textAlign = "left";
-			lbl.textContent = tName(kind) + " ×" + count(state.deck, kind);
-			const acts = document.createElement("div");
-			acts.style.display = "flex";
-			acts.style.gap = "8px";
-			acts.style.flexShrink = "0";
-			acts.appendChild(screenButton("删", () => buy(it, { kind: kind })));
-			card.appendChild(lbl);
-			card.appendChild(acts);
-			body.appendChild(card);
+			body.appendChild(screenButton("「" + tName(kind) + "」×" + count(state.deck, kind), () => buy(it, { kind: kind }), false, true));
 		}
 		footer.innerHTML = "";
 		footer.appendChild(screenButton("⟵ 返回", renderRow));
