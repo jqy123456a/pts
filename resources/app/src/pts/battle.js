@@ -165,6 +165,10 @@ game.ptsRemoveRestartButtons = function () {
 };
 game.ptsZoomBy = zoomBy;
 game.ptsTidyBattleUI = ptsTidyBattleUI;
+/* 供满屏面板反向抵消界面缩放,保持固定屏幕尺寸 */
+game.ptsGetZoom = function () {
+	return game.documentZoom || game.deviceZoom || 1;
+};
 
 /* 真卡组洗入引擎牌堆:牌串 → [suit,number,name,nature] 元组 → 洗牌 → ui.create.card().init()。
  * 奖励/商店直接改 state.deck,下一场 installDeck 全量覆盖,故无回滚。 */

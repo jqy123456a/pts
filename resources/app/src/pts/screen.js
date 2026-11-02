@@ -1,5 +1,6 @@
 /* 满屏节点交互层:商店/奖励/宝箱/篝火/事件共用的全屏画面骨架。纯 DOM,无 noname 依赖。
  * 样式一律逐属性赋值(style.height=...),不用 cssText 整串(引擎环境下不可靠)。
+ * 尺寸按游戏界面缩放(game.ptsGetZoom)反向抵消,面板始终保持固定屏幕大小。
  * ⚠ panel 的 min-height 是可见性的关键,改动布局时不得删除。 */
 
 let styleInjected = false;
@@ -16,6 +17,22 @@ function injectStyle() {
 		".pts-screen .card .acts{display:flex;gap:8px;flex-shrink:0;}",
 	].join("");
 	document.head.appendChild(st);
+}
+
+/* 设计稿像素 → 实际 CSS 像素(除以界面缩放,防御异常值) */
+function uiPx(v) {
+	let z = 1;
+	try {
+		if (typeof window.ptsGetZoom === "function") {
+			z = window.ptsGetZoom() || 1;
+		}
+	} catch (e) {
+		z = 1;
+	}
+	if (!(z >= 0.5 && z <= 5)) {
+		z = 1;
+	}
+	return Math.round(v / z) + "px";
 }
 
 export function openScreen(title) {
@@ -37,9 +54,9 @@ export function openScreen(title) {
 	panel.style.left = "50%";
 	panel.style.top = "50%";
 	panel.style.transform = "translate(-50%,-50%)";
-	panel.style.width = "680px";
+	panel.style.width = uiPx(680);
 	panel.style.maxWidth = "92vw";
-	panel.style.minHeight = "360px";
+	panel.style.minHeight = uiPx(360);
 	panel.style.maxHeight = "82vh";
 	panel.style.background = "#161616";
 	panel.style.border = "1px solid #555";
@@ -49,10 +66,10 @@ export function openScreen(title) {
 	panel.style.boxSizing = "border-box";
 
 	const hd = document.createElement("div");
-	hd.style.height = "56px";
-	hd.style.lineHeight = "56px";
+	hd.style.height = uiPx(56);
+	hd.style.lineHeight = uiPx(56);
 	hd.style.textAlign = "center";
-	hd.style.fontSize = "20px";
+	hd.style.fontSize = uiPx(20);
 	hd.style.fontWeight = "bold";
 	hd.style.background = "#101216";
 	hd.style.borderBottom = "1px solid #444";
@@ -61,15 +78,15 @@ export function openScreen(title) {
 
 	const body = document.createElement("div");
 	body.style.overflowY = "auto";
-	body.style.padding = "16px 20px";
+	body.style.padding = uiPx(16) + " " + uiPx(20);
 
 	const footer = document.createElement("div");
 	footer.style.display = "flex";
 	footer.style.justifyContent = "center";
 	footer.style.alignItems = "center";
-	footer.style.gap = "12px";
+	footer.style.gap = uiPx(12);
 	footer.style.flexWrap = "wrap";
-	footer.style.padding = "14px 20px";
+	footer.style.padding = uiPx(14) + " " + uiPx(20);
 	footer.style.borderTop = "1px solid rgba(255,255,255,.08)";
 	footer.style.background = "rgba(255,255,255,.04)";
 
@@ -90,18 +107,18 @@ export function openScreen(title) {
 export function screenButton(label, onclick, disabled, full) {
 	const b = document.createElement("button");
 	b.textContent = label;
-	b.style.padding = "10px 20px";
-	b.style.fontSize = "15px";
+	b.style.padding = uiPx(10) + " " + uiPx(20);
+	b.style.fontSize = uiPx(15);
 	b.style.border = "1px solid rgba(255,255,255,.22)";
 	b.style.background = "rgba(255,255,255,.08)";
 	b.style.color = "#eee";
-	b.style.borderRadius = "10px";
+	b.style.borderRadius = uiPx(10);
 	b.style.cursor = "pointer";
 	if (full) {
 		b.style.display = "block";
 		b.style.width = "100%";
 		b.style.boxSizing = "border-box";
-		b.style.marginBottom = "8px";
+		b.style.marginBottom = uiPx(8);
 	}
 	if (disabled) {
 		b.disabled = true;
