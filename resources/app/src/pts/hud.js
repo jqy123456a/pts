@@ -25,19 +25,20 @@ export function updateHud(state) {
 		);
 	};
 	const hpLow = state.hp <= 2;
+	const heroName = state.heroName || state.hero;
 	const hero =
 		'<div style="display:flex;align-items:center;gap:8px;background:#1a1e24;border:1px solid #e8c268;border-radius:10px;padding:6px 14px;">' +
 		'<img src="' +
 		lib.assetURL +
 		"image/character/" +
 		state.hero +
-		'.jpg" style="width:34px;height:34px;border-radius:50%;object-fit:cover;" onerror="this.style.visibility=\'hidden\'">' +
-		'<div><div style="font-size:17px;font-weight:bold;color:#e8e4d8;">' +
-		(state.heroName || state.hero) +
-		"</div></div></div>";
+		'.jpg" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.visibility=\'hidden\'">' +
+		'<div style="font-size:17px;font-weight:bold;color:#e8e4d8;white-space:nowrap;">' +
+		heroName +
+		"</div></div>";
 	hud.innerHTML =
-		hero +
 		card("❤", state.hp + "/" + state.hpMax, hpLow ? "#ff6b6b" : "#ff8a8a", hpLow ? "体力告急!" : "体力") +
 		card("💰", state.gold, "#e8c268", "金币") +
-		card("🂠", state.deck ? state.deck.length : state.deckCount, "#7ec4ff", "卡组");
+		card("🂠", state.deck ? state.deck.length : state.deckCount, "#7ec4ff", "卡组") +
+		hero;
 }
