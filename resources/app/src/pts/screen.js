@@ -1,35 +1,17 @@
 /* 满屏节点交互层:商店/奖励/宝箱/篝火/事件共用弹窗。
  * 改用引擎自带 dialog 体系(ui.create.dialog)——与选将/结算同一套 UI,
  * 天然跟随界面缩放移动位置、自动居中、内容常规文档流绝不重叠。
+ * ⚠ 行/卡片样式一律内联,类名不得使用引擎保留名(如 card/lbl/acts)。
  * 打开时隐藏地图层,关闭时恢复。 */
 
 import { ui } from "noname";
 
-let styleInjected = false;
-function injectStyle() {
-	if (styleInjected) {
-		return;
-	}
-	styleInjected = true;
-	const st = document.createElement("style");
-	st.id = "pts-screen-style";
-	st.innerHTML = [
-		".pts-dlg{overflow-y:auto;}",
-		".pts-dlg .card{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1a1e24;border:1px solid #3a3f46;border-radius:10px;padding:12px 16px;margin-bottom:8px;}",
-		".pts-dlg .card .lbl{flex:1;}",
-		".pts-dlg .card .acts{display:flex;gap:8px;flex-shrink:0;}",
-	].join("");
-	document.head.appendChild(st);
-}
-
 export function openScreen(title) {
-	injectStyle();
 	const dialog = ui.create.dialog(title);
-	console.log("[pts:reward] openScreen v6 (engine dialog)");
+	console.log("[pts:reward] openScreen v7 (engine dialog)");
 
 	const body = document.createElement("div");
-	body.className = "pts-dlg";
-	body.dataset.ptsVer = "v6";
+	body.dataset.ptsVer = "v7";
 	body.style.width = "100%";
 	body.style.boxSizing = "border-box";
 

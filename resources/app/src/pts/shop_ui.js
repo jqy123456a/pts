@@ -49,13 +49,16 @@ export function showShopPanel() {
 		body.appendChild(gold);
 		for (const it of state.shopInv) {
 			const card = document.createElement("div");
-			card.className = "card";
+			card.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1a1e24;border:1px solid #3a3f46;border-radius:10px;padding:12px 16px;margin-bottom:8px;";
 			const lbl = document.createElement("div");
-			lbl.className = "lbl";
+			lbl.style.flex = "1";
+			lbl.style.textAlign = "left";
 			lbl.textContent = itemLabel(it);
 			if (it.sold) { lbl.style.opacity = "0.4"; }
 			const acts = document.createElement("div");
-			acts.className = "acts";
+			acts.style.display = "flex";
+			acts.style.gap = "8px";
+			acts.style.flexShrink = "0";
 			if (it.sold) {
 				acts.appendChild(screenButton("已售罄", () => {}, true));
 			} else if (it.kind === "recipe" && it.recipe.toEach) {
@@ -81,12 +84,15 @@ export function showShopPanel() {
 		body.appendChild(tip);
 		for (const kind of kindsOf(state.deck)) {
 			const card = document.createElement("div");
-			card.className = "card";
+			card.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1a1e24;border:1px solid #3a3f46;border-radius:10px;padding:12px 16px;margin-bottom:8px;";
 			const lbl = document.createElement("div");
-			lbl.className = "lbl";
+			lbl.style.flex = "1";
+			lbl.style.textAlign = "left";
 			lbl.textContent = tName(kind) + " ×" + count(state.deck, kind);
 			const acts = document.createElement("div");
-			acts.className = "acts";
+			acts.style.display = "flex";
+			acts.style.gap = "8px";
+			acts.style.flexShrink = "0";
 			acts.appendChild(screenButton("删", () => buy(it, { kind: kind })));
 			card.appendChild(lbl);
 			card.appendChild(acts);
